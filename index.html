@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ArmorX Retail Shop</title>
+  <!-- Social Sharing Open Graph & Twitter meta tags -->
+  <meta property="og:title" content="ArmorX Retail Shop | Mosquito Net Calculator">
+  <meta property="og:description" content="Instantly calculate window mosquito net sizes & prices. Order fast. Pay with UPI.">
+  <meta property="og:image" content="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://armorx-net.github.io/shop/">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ArmorX Retail Shop | Mosquito Net Calculator">
+  <meta name="twitter:description" content="Instantly calculate window mosquito net sizes & prices. Order fast. Pay with UPI.">
+  <meta name="twitter:image" content="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg">
+
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <img src="https://i.postimg.cc/Ls8tJXFk/ARMORX-Logo.png" alt="ArmorX Logo" class="brand-logo" />
+    <div id="app-title"><h2>ArmorX Retail Shop</h2></div>
+    <div id="login-section">
+      <input type="tel" id="retailer-phone" maxlength="10" placeholder="Enter 10-digit Retailer Mobile"/>
+      <button onclick="login()">Login</button>
+    </div>
+    <form id="order-section" style="display:none;" onsubmit="event.preventDefault();">
+      <div id="main-title">
+        <h2>ArmorX Retail Shop</h2>
+        <button type="button" id="logout-btn" onclick="logout()" style="float:right;margin-right:6px;font-size:0.98em;padding:7px 16px 7px 16px;background:#ffeaea;color:#b20000;border-radius:6px;border:none;box-shadow:0 1px 3px #b2000022;cursor:pointer;">Logout</button>
+      </div>
+      <h3>Add Window Nets</h3>
+      <div id="windows-list"></div>
+      <button type="button" class="add-btn" onclick="addWindowEntry()">+ Add Window</button>
+      <div class="invoice">
+        <strong>Total: ₹<span id="total-price">0</span></strong>
+        <button type="button" class="upi-btn" onclick="showUPIQR()">Pay via UPI</button>
+      </div>
+      <h4>Customer Details</h4>
+      <input id="cust-name" type="text" placeholder="Customer Name"/>
+      <input id="cust-phone" type="tel" maxlength="10" placeholder="Customer Phone"/>
+      <div>
+        <label>Delivery:</label>
+        <select id="delivery-mode" onchange="handleDeliveryChange()">
+          <option value="Store Pickup">Store Pickup</option>
+          <option value="Home Delivery">Home Delivery</option>
+        </select>
+      </div>
+      <input id="cust-address" type="text" style="display:none;" placeholder="Customer Address"/>
+      <button type="button" class="wa-btn" onclick="sendOnWhatsApp()">Send on WhatsApp</button>
+    </form>
+    <img src="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg" alt="ArmorX Banner" class="brand-banner"/>
+  </div>
+
+  <script src="app.js"></script>
+
+  <!-- UPI Modal -->
+  <div id="upiModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0007; z-index:99; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:16px; padding:28px; text-align:center; min-width:240px; max-width:98vw;">
+      <h3>Scan to Pay via UPI</h3>
+      <canvas id="qrCanvas" style="margin:0 auto 14px auto;"></canvas>
+      <div id="upiAmount" style="font-size:1.13em; color:#1a6b2b; font-weight:600; margin:8px 0 2px 0;"></div>
+      <div style="margin:10px 0;">
+        <b>UPI ID:</b> <span id="upiText"></span>
+      </div>
+      <button onclick="editUPI()" style="background:#eee;color:#333;font-size:1em;padding:6px 16px;margin-bottom:10px;">Edit UPI ID</button><br>
+      <button onclick="document.getElementById('upiModal').style.display='none'" style="background:#ff5757;color:#fff;">Close</button>
+    </div>
+  </div>
+
+  <!-- Saving Spinner (overlay, not inside any modal) -->
+  <div id="savingSpinner" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.80);z-index:1000;text-align:center;padding-top:140px;font-size:1.18em;">
+    <span>Saving order... Please wait.</span>
+  </div>   
+
+</body>
+</html>
