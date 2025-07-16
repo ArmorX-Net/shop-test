@@ -29,31 +29,65 @@
       <input type="tel" id="retailer-phone" maxlength="10" placeholder="Enter 10-digit Retailer Mobile"/>
       <button onclick="login()">Login</button>
     </div>
-    <form id="order-section" style="display:none;" onsubmit="event.preventDefault();">
-      <div id="main-title">
-        <h2>ArmorX Retail Shop</h2>
-        <button type="button" id="logout-btn" onclick="logout()" style="float:right;margin-right:6px;font-size:0.98em;padding:7px 16px 7px 16px;background:#ffeaea;color:#b20000;border-radius:6px;border:none;box-shadow:0 1px 3px #b2000022;cursor:pointer;">Logout</button>
+
+    <!-- Only one order UI: Stepper starts here -->
+    <div id="order-stepper-container" style="display:none;">
+      <!-- STEP 1: Order Details -->
+      <div id="step-1" class="step-panel">
+        <h3>Step 1: Enter Order Details</h3>
+        <div id="windows-list"></div>
+        <button type="button" class="add-btn" onclick="addWindowEntry()">+ Add Window</button>
+        <div class="invoice">
+          <strong>Total: ₹<span id="total-price">0</span></strong>
+        </div>
+        <h4>Customer Details</h4>
+        <input id="cust-name" type="text" placeholder="Customer Name"/>
+        <input id="cust-phone" type="tel" maxlength="10" placeholder="Customer Phone"/>
+        <div>
+          <label>Delivery:</label>
+          <select id="delivery-mode" onchange="handleDeliveryChange()">
+            <option value="Store Pickup">Store Pickup</option>
+            <option value="Home Delivery">Home Delivery</option>
+          </select>
+        </div>
+        <input id="cust-address" type="text" style="display:none;" placeholder="Customer Address"/>
+        <button id="step1-next-btn" class="wa-btn" onclick="handleOrderDetailsNext()">Next: Payment</button>
       </div>
-      <h3>Add Window Nets</h3>
-      <div id="windows-list"></div>
-      <button type="button" class="add-btn" onclick="addWindowEntry()">+ Add Window</button>
-      <div class="invoice">
-        <strong>Total: ₹<span id="total-price">0</span></strong>
-        <button type="button" class="upi-btn" onclick="showUPIQR()">Pay via UPI</button>
+
+      <!-- STEP 2: Payment -->
+      <div id="step-2" class="step-panel" style="display:none;">
+        <h3>Step 2: Payment</h3>
+        <div style="margin-bottom:14px;">
+          <b>Order ID:</b> <span id="order-id-display"></span>
+        </div>
+        <div>
+          <button type="button" class="upi-btn" onclick="showUPIQR()">Show UPI QR</button>
+        </div>
+        <div style="margin:18px 0;">
+          <label><input type="checkbox" id="payment-collected-checkbox" onchange="togglePaymentNextBtn()"> Payment Collected</label>
+        </div>
+        <button id="step2-next-btn" class="wa-btn" onclick="handlePaymentNext()" disabled>Next: Submit Order</button>
+        <button type="button" onclick="showStep(1)" style="margin-top:10px;">Back</button>
       </div>
-      <h4>Customer Details</h4>
-      <input id="cust-name" type="text" placeholder="Customer Name"/>
-      <input id="cust-phone" type="tel" maxlength="10" placeholder="Customer Phone"/>
-      <div>
-        <label>Delivery:</label>
-        <select id="delivery-mode" onchange="handleDeliveryChange()">
-          <option value="Store Pickup">Store Pickup</option>
-          <option value="Home Delivery">Home Delivery</option>
-        </select>
+
+      <!-- STEP 3: Confirm & Submit -->
+      <div id="step-3" class="step-panel" style="display:none;">
+        <h3>Step 3: Confirm & Submit Order</h3>
+        <div id="order-summary-panel" style="margin-bottom:18px;"></div>
+        <button class="wa-btn" onclick="handleSubmitOrder()">Submit Order</button>
+        <button type="button" onclick="showStep(2)" style="margin-top:10px;">Back</button>
       </div>
-      <input id="cust-address" type="text" style="display:none;" placeholder="Customer Address"/>
-      <button type="button" class="wa-btn" onclick="sendOnWhatsApp()">Send on WhatsApp</button>
-    </form>
+
+      <!-- STEP 4: Success/History (optional) -->
+      <div id="step-4" class="step-panel" style="display:none;">
+        <h3>Order Submitted!</h3>
+        <div id="order-success-msg">Your order has been sent on WhatsApp and saved in our system.</div>
+        <button onclick="showStep(1)" style="margin-top:14px;">Create New Order</button>
+        <!-- Optionally show order history for this retailer here -->
+      </div>
+    </div>
+    <!-- Stepper UI ends here -->
+
     <img src="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg" alt="ArmorX Banner" class="brand-banner"/>
   </div>
 
