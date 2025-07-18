@@ -1,3 +1,4 @@
+console.log('ArmorX App JS loaded!');
 let windowCount = 0;
 let netSizes = [];
 let loggedRetailer = null;
