@@ -4,20 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>ArmorX Retail Shop</title>
-  <!-- Social Sharing Open Graph & Twitter meta tags -->
-  <meta property="og:title" content="ArmorX Retail Shop | Mosquito Net Calculator">
-  <meta property="og:description" content="Instantly calculate window mosquito net sizes & prices. Order fast. Pay with UPI.">
-  <meta property="og:image" content="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://armorx-net.github.io/shop/">
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="ArmorX Retail Shop | Mosquito Net Calculator">
-  <meta name="twitter:description" content="Instantly calculate window mosquito net sizes & prices. Order fast. Pay with UPI.">
-  <meta name="twitter:image" content="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg">
-
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
 </head>
@@ -30,8 +16,9 @@
       <button onclick="login()">Login</button>
     </div>
 
-    <!-- Only one order UI: Stepper starts here -->
+    <!-- ORDER STEPPER UI STARTS -->
     <div id="order-stepper-container" style="display:none;">
+
       <!-- STEP 1: Order Details -->
       <div id="step-1" class="step-panel">
         <h3>Step 1: Enter Order Details</h3>
@@ -60,6 +47,7 @@
         <div style="margin-bottom:14px;">
           <b>Order ID:</b> <span id="order-id-display"></span>
         </div>
+        <div id="payment-order-summary" style="background:#f7f7ff; border-radius:9px; margin-bottom:18px; padding:8px 10px 5px 10px; font-size:0.97em;"></div>
         <div>
           <button type="button" class="upi-btn" onclick="showUPIQR()">Show UPI QR</button>
         </div>
@@ -83,10 +71,10 @@
         <h3>Order Submitted!</h3>
         <div id="order-success-msg">Your order has been sent on WhatsApp and saved in our system.</div>
         <button onclick="showStep(1)" style="margin-top:14px;">Create New Order</button>
-        <!-- Optionally show order history for this retailer here -->
       </div>
+
     </div>
-    <!-- Stepper UI ends here -->
+    <!-- ORDER STEPPER UI ENDS -->
 
     <img src="https://i.postimg.cc/9F79Z5wv/Calculator-Home-Page.jpg" alt="ArmorX Banner" class="brand-banner"/>
   </div>
@@ -107,7 +95,7 @@
     </div>
   </div>
 
-  <!-- Saving Spinner (overlay, not inside any modal) -->
+  <!-- Saving Spinner -->
   <div id="savingSpinner" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.80);z-index:1000;text-align:center;padding-top:140px;font-size:1.18em;">
     <span>Saving order... Please wait.</span>
   </div>   
