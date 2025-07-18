@@ -48,7 +48,16 @@ function logout() {
 // ------- STEPPER UI -------
 function showStep(n) {
   for (let i = 1; i <= 4; i++) document.getElementById('step-' + i).style.display = (i === n ? 'block' : 'none');
+  if (n === 2) {
+    // On Payment step, show summary!
+    document.getElementById('payment-order-summary').innerHTML = renderOrderSummaryHtml();
+  }
+  if (n === 3) {
+    // Already handled in handlePaymentNext()
+    document.getElementById('order-summary-panel').innerHTML = renderOrderSummaryHtml();
+  }
 }
+
 
 // ------- WINDOWS & PRICING -------
 function addWindowEntry() {
@@ -178,12 +187,12 @@ function togglePaymentNextBtn() {
 // Step 2 → Step 3: Show order summary
 function handlePaymentNext() {
   // Render summary for confirmation
-  let summary = `<b>Order ID:</b> ${currentOrderId}<br>`;
-  summary += `<b>Customer:</b> ${document.getElementById('cust-name').value} (${document.getElementById('cust-phone').value})<br>`;
+function renderOrderSummaryHtml() {
+  let summary = `<b>Customer:</b> ${document.getElementById('cust-name').value} (${document.getElementById('cust-phone').value})<br>`;
   summary += `<b>Delivery:</b> ${document.getElementById('delivery-mode').value}`;
   if (document.getElementById('cust-address').style.display !== 'none')
     summary += `<br><b>Address:</b> ${document.getElementById('cust-address').value}`;
-  summary += "<hr><b>Windows:</b><br>";
+  summary += "<hr style='margin:6px 0;'><b>Windows:</b><br>";
   document.querySelectorAll('.window-box').forEach((box, i) => {
     let idx = box.id.split('-')[2];
     let h = document.getElementById('h'+idx).value;
@@ -197,10 +206,10 @@ function handlePaymentNext() {
       summary += `#${i+1}: ${h}x${w} ${u} | ${colorName} | Qty: ${qty} | ₹${price}<br>`;
     }
   });
-  summary += `<hr><b>Total: ₹${document.getElementById('total-price').innerText}</b>`;
-  document.getElementById('order-summary-panel').innerHTML = summary;
-  showStep(3);
+  summary += `<hr style='margin:6px 0 4px 0;'><b>Total: ₹${document.getElementById('total-price').innerText}</b>`;
+  return summary;
 }
+
 
 // Step 3 → Step 4: Save order & WhatsApp
 function handleSubmitOrder() {
