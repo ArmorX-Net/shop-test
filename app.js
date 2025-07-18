@@ -169,7 +169,30 @@ function handleOrderDetailsNext() {
   currentOrderId = `AXW-${last4}-${now.getFullYear().toString().slice(-2)}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
   document.getElementById('order-id-display').innerText = currentOrderId;
 
-  showStep(2);
+// ---- Build summary like in handlePaymentNext() ----
+let summary = "";
+summary += `<b>Customer:</b> ${document.getElementById('cust-name').value} (${document.getElementById('cust-phone').value})<br>`;
+summary += `<b>Delivery:</b> ${document.getElementById('delivery-mode').value}`;
+if (document.getElementById('cust-address').style.display !== 'none')
+  summary += `<br><b>Address:</b> ${document.getElementById('cust-address').value}`;
+summary += "<hr><b>Windows:</b><br>";
+document.querySelectorAll('.window-box').forEach((box, i) => {
+  let idx = box.id.split('-')[2];
+  let h = document.getElementById('h'+idx).value;
+  let w = document.getElementById('w'+idx).value;
+  let u = document.getElementById('u'+idx).value;
+  let c = document.getElementById('c'+idx).value;
+  let qty = document.getElementById('qty'+idx).value;
+  let price = document.getElementById('p'+idx).innerText;
+  let colorName = { BK: 'Black', CR: 'Cream', GR: 'Grey', WH: 'White' }[c] || c;
+  if (h && w && price && qty > 0) {
+    summary += `#${i+1}: ${h}x${w} ${u} | ${colorName} | Qty: ${qty} | ₹${price}<br>`;
+  }
+});
+summary += `<hr><b>Total: ₹${document.getElementById('total-price').innerText}</b>`;
+document.getElementById('payment-order-summary').innerHTML = summary;
+
+showStep(2);
 }
 // Payment checkbox
 function togglePaymentNextBtn() {
