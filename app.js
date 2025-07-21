@@ -356,3 +356,119 @@ function editUPI() {
 document.addEventListener("click", function(e) {
   if (e.target.id === "upiModal") document.getElementById('upiModal').style.display = "none";
 });
+
+// === Retailer PIN & Payout Logic (keep this together!) ===
+
+// Attach long-press detection on logo after DOM loads
+document.addEventListener("DOMContentLoaded", function() {
+  const logo = document.querySelector('.brand-logo');
+  let timer = null;
+  if (logo) {
+    logo.addEventListener('mousedown', () => { timer = setTimeout(showPinModal, 850); });
+    logo.addEventListener('touchstart', () => { timer = setTimeout(showPinModal, 850); });
+    logo.addEventListener('mouseup', () => { if (timer) clearTimeout(timer); });
+    logo.addEventListener('mouseleave', () => { if (timer) clearTimeout(timer); });
+    logo.addEventListener('touchend', () => { if (timer) clearTimeout(timer); });
+  }
+});
+
+function showPinModal() {
+  document.getElementById('retailerPinInput').value = "";
+  document.getElementById('pinError').style.display = "none";
+  document.getElementById('pinModal').style.display = "flex";
+  setTimeout(() => {
+    document.getElementById('retailerPinInput').focus();
+  }, 100);
+}
+function closePinModal() {
+  document.getElementById('pinModal').style.display = "none";
+}
+function closePayoutModal() {
+  document.getElementById('payoutModal').style.display = "none";
+}
+
+function verifyRetailerPIN() {
+  const input = document.getElementById('retailerPinInput').value.trim();
+  const retailerNumber = localStorage.getItem('retailUser') || "";
+  const expectedPin = retailerNumber.slice(-4); // last 4 digits
+  if (input === expectedPin) {
+  closePinModal();
+  showDashboardModal(); // << call your dashboard modal function here!
+} else {
+  document.getElementById('pinError').style.display = "block";
+}
+}
+
+// --- Payout logic (replace fetch with actual Sheet call in future) ---
+function showPayoutModal() {
+  // Display loader text while fetching
+  document.getElementById('payoutDetails').innerHTML = "Calculating your payout…";
+
+  // Dummy calculation (replace with real logic: fetch + filter for this retailer)
+  // Example: Suppose 12 orders this month, total sales = ₹20,000, payout = ₹2,000
+  setTimeout(() => {
+    document.getElementById('payoutDetails').innerHTML =
+      `Total Sales: <b>₹20,000</b><br>Payout (10%): <span style='color:#005c28;font-weight:700;'>₹2,000</span>`;
+  }, 800);
+
+  document.getElementById('payoutModal').style.display = "flex";
+}
+
+// --- Dashboard Modal logic ---
+function showDashboardModal() {
+  // Dummy data
+  const retailerName = localStorage.getItem('retailUserName') || "Retailer";
+  const todayOrders = 8, yesterdayOrders = 7;
+  const growth = ((todayOrders - yesterdayOrders)/Math.max(1,yesterdayOrders) * 100).toFixed(1) + "%";
+  const monthSales = 27000, pending = 1800, lastPayout = 2300;
+
+  document.getElementById('retailerDashName').innerText = retailerName;
+  document.getElementById('dashTodayOrders').innerText = todayOrders;
+  document.getElementById('dashGrowth').innerText = (todayOrders - yesterdayOrders >= 0 ? "+" : "") + growth;
+  document.getElementById('dashMonthSales').innerText = "₹" + monthSales.toLocaleString();
+  document.getElementById('dashPending').innerText = "₹" + pending.toLocaleString();
+  document.getElementById('dashLastPayout').innerText = "₹" + lastPayout.toLocaleString();
+
+  // Dummy order trend (7 days)
+  let days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let sales = [4, 6, 3, 8, 7, 5, todayOrders];
+  let ctx = document.getElementById('ordersBarChart').getContext('2d');
+  if (window.dashboardChart) window.dashboardChart.destroy();
+  window.dashboardChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Orders',
+        data: sales,
+        backgroundColor: '#a8e063'
+      }]
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false }},
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // Dummy recent orders
+  document.getElementById('dashRecentOrders').innerHTML = `
+    <div>ORD20240715-01 | <b>₹1,200</b> | <span style="color:#007b1c">Confirmed</span></div>
+    <div>ORD20240715-02 | <b>₹2,100</b> | <span style="color:#bfa000">Pending</span></div>
+    <div>ORD20240714-05 | <b>₹700</b> | <span style="color:#007b1c">Confirmed</span></div>
+    <div>ORD20240713-03 | <b>₹2,300</b> | <span style="color:#e25c04">Cancelled</span></div>
+    <div>ORD20240713-01 | <b>₹1,850</b> | <span style="color:#007b1c">Confirmed</span></div>
+  `;
+
+  // Dummy payout table
+  document.getElementById('dashPayoutTable').innerHTML = `
+    <tr><td>15 Jul</td><td>₹2,300</td><td><span style="color:#14b01c">Paid</span></td></tr>
+    <tr><td>7 Jul</td><td>₹1,850</td><td><span style="color:#bfa000">Processing</span></td></tr>
+    <tr><td>1 Jul</td><td>₹1,750</td><td><span style="color:#14b01c">Paid</span></td></tr>
+  `;
+
+  document.getElementById('dashboardModal').style.display = 'flex';
+}
+function closeDashboardModal() {
+  document.getElementById('dashboardModal').style.display = 'none';
+}
