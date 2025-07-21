@@ -168,3 +168,41 @@ button:hover { background: var(--primary-dark); }
   box-shadow: 0 2px 7px #b9ffd3;
 }
 .upi-btn:hover { background: #1d674b; }
+/* Dashboard Modal Styles (paste at end of your style.css) */
+.dash-metric {
+  background: #eafee7;
+  border-radius: 12px;
+  padding: 14px 16px 10px 16px;
+  flex: 1 1 100px;
+  min-width: 100px;
+  text-align: center;
+  box-shadow: 0 2px 8px #a5ffc850;
+}
+.metric-title {
+  color: #37793d;
+  font-size: 0.98em;
+  margin-bottom: 4px;
+}
+.metric-value {
+  font-weight: 700;
+  font-size: 1.27em;
+  color: #246422;
+}
+.metric-sub {
+  font-size: 0.93em;
+  color: #5b9117;
+}
+#dashboardModal table {
+  border-collapse: collapse;
+}
+#dashboardModal th, #dashboardModal td {
+  padding: 5px 9px;
+  text-align: left;
+}
+#dashboardModal th {
+  background: #f3f9f0;
+}
+#dashboardModal tr:nth-child(even) td {
+  background: #f6f6fa;
+}
+
