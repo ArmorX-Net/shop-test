@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (localStorage.getItem('retailUser')) {
     loggedRetailer = localStorage.getItem('retailUser');
     document.getElementById('login-section').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'inline-block';
     document.getElementById('order-stepper-container').style.display = 'block';
     showStep(1);
     addWindowEntry();
@@ -35,6 +36,7 @@ function login() {
   localStorage.setItem('retailUser', phone);
   localStorage.setItem('retailUserName', found.name);
   document.getElementById('login-section').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'inline-block';
   document.getElementById('order-stepper-container').style.display = 'block';
   showStep(1);
   addWindowEntry();
@@ -42,8 +44,12 @@ function login() {
 
 function logout() {
   localStorage.removeItem('retailUser');
+  localStorage.removeItem('retailUserName');
+  localStorage.removeItem('retailerUPI');
+  document.getElementById('logout-btn').style.display = 'none';
   window.location.reload();
 }
+
 
 // ------- STEPPER UI -------
 function showStep(n) {
