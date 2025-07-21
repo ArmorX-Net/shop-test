@@ -207,12 +207,34 @@ button:hover { background: var(--primary-dark); }
 }
 
 #logout-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  z-index: 1200;
+  width: auto !important;   /* Prevent 100% stretch */
+  min-width: 88px;
+  padding: 7px 20px;
+  background: #ffeaea;
+  color: #b20000;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1em;
+  box-shadow: 0 1px 3px #b2000022;
+  cursor: pointer;
+  margin: 0;
+  display: none;            /* Show/hide via JS */
 }
-.container {
-  position: relative; 
+
+#logout-btn:hover {
+  background: #ffbaba;
+  color: #a00000;
 }
+
+@media (max-width: 540px) {
+  #logout-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 0.97em;
+    padding: 6px 13px;
+    min-width: 65px;
+  }
+}
+
 
