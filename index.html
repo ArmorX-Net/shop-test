@@ -24,9 +24,10 @@
 </head>
 <body>
   <div class="container">
+    <!-- Logout button should be the very first child for absolute positioning -->
+    <button id="logout-btn" onclick="logout()" style="display:none;">Logout</button>
     <img src="https://i.postimg.cc/Ls8tJXFk/ARMORX-Logo.png" alt="ArmorX Logo" class="brand-logo" />
     <div id="app-title"><h2>ArmorX Retail Shop</h2></div>
-<button id="logout-btn" onclick="logout()" style="float:right; margin:10px 12px 0 0; background:#ffeaea; color:#b20000; border:none; border-radius:6px; font-weight:600; font-size:1em; padding:6px 16px; box-shadow:0 1px 3px #b2000022; cursor:pointer; display:none;">Logout</button>
 
     <div id="login-section">
       <input type="tel" id="retailer-phone" maxlength="10" placeholder="Enter 10-digit Retailer Mobile"/>
