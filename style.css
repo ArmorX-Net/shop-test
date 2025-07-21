@@ -206,3 +206,9 @@ button:hover { background: var(--primary-dark); }
   background: #f6f6fa;
 }
 
+#logout-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1200;
+}
