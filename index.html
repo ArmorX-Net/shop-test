@@ -98,19 +98,19 @@
 
   <script src="app.js"></script>
 
-  <!-- UPI Modal -->
-  <div id="upiModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0007; z-index:99; justify-content:center; align-items:center;">
-    <div style="background:#fff; border-radius:16px; padding:28px; text-align:center; min-width:240px; max-width:98vw;">
-      <h3>Scan to Pay via UPI</h3>
-      <canvas id="qrCanvas" style="margin:0 auto 14px auto;"></canvas>
-      <div id="upiAmount" style="font-size:1.13em; color:#1a6b2b; font-weight:600; margin:8px 0 2px 0;"></div>
-      <div style="margin:10px 0;">
-        <b>UPI ID:</b> <span id="upiText"></span>
-      </div>
-      <button onclick="editUPI()" style="background:#eee;color:#333;font-size:1em;padding:6px 16px;margin-bottom:10px;">Edit UPI ID</button><br>
-      <button onclick="document.getElementById('upiModal').style.display='none'" style="background:#ff5757;color:#fff;">Close</button>
+ <!-- UPI Modal -->
+<div id="upiModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0007; z-index:99; justify-content:center; align-items:center;">
+  <div style="background:#fff; border-radius:16px; padding:28px; text-align:center; min-width:240px; max-width:98vw;">
+    <h3>Scan to Pay via UPI</h3>
+    <canvas id="qrCanvas" style="margin:0 auto 14px auto;"></canvas>
+    <div id="upiAmount" style="font-size:1.13em; color:#1a6b2b; font-weight:600; margin:8px 0 2px 0;"></div>
+    <div style="margin:10px 0;">
+      <b>UPI ID:</b> <span id="upiText"></span>
     </div>
+    <button onclick="document.getElementById('upiModal').style.display='none'" style="background:#ff5757;color:#fff;">Close</button>
   </div>
+</div>
+
 
   <!-- Saving Spinner (overlay, not inside any modal) -->
   <div id="savingSpinner" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.80);z-index:1000;text-align:center;padding-top:140px;font-size:1.18em;">
