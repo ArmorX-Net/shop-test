@@ -325,15 +325,8 @@ function handleSubmitOrder() {
 
 // UPI QR
 function showUPIQR() {
-  let upiID = localStorage.getItem('retailerUPI');
-  if (!upiID || !upiID.includes('@')) {
-    upiID = prompt("Enter your UPI ID for payment collection (e.g., 9876543210@okicici):");
-    if (!upiID || !upiID.includes('@')) {
-      alert("Invalid UPI ID. Please try again."); return;
-    }
-    localStorage.setItem('retailerUPI', upiID);
-  }
-  const payee = "ArmorX Retailer";
+  const upiID = "mbventures@kotak"; // Hardcoded UPI ID
+  const payee = "ArmorX Retail Shop";
   const amount = document.getElementById('total-price').innerText || 0;
   const note = `ArmorX Window Order ${currentOrderId}`;
   const upiString = `upi://pay?pa=${encodeURIComponent(upiID)}&pn=${encodeURIComponent(payee)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
@@ -345,17 +338,6 @@ function showUPIQR() {
   document.getElementById('upiText').innerText = upiID;
   document.getElementById('upiAmount').innerHTML = `<span style="font-size:1.25em;">₹${amount}</span>`;
   document.getElementById('upiModal').style.display = "flex";
-}
-function editUPI() {
-  let current = localStorage.getItem('retailerUPI') || "";
-  let upiID = prompt("Update your UPI ID:", current);
-  if (upiID && upiID.includes('@')) {
-    localStorage.setItem('retailerUPI', upiID);
-    document.getElementById('upiText').innerText = upiID;
-    showUPIQR();
-  } else if (upiID !== null) {
-    alert("Invalid UPI ID.");
-  }
 }
 
 // Allow closing UPI modal with outside click (optional, for good UX)
