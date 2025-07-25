@@ -131,12 +131,20 @@
 </div>
 
  <!-- Retailer Dashboard Modal -->
-<div id="dashboardModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0007; z-index:1100; align-items:center; justify-content:center;">
-  <div style="background:#fff; border-radius:18px; padding:38px 30px 28px 30px; min-width:330px; max-width:98vw; box-shadow:0 6px 32px #008d1e13;">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2 style="margin-bottom:8px; color:#246422; font-size:1.35em;">Welcome, <span id="retailerDashName">Retailer</span></h2>
-      <button class="modal-btn" onclick="closeDashboardModal()" style="background:#ffeaea; color:#b20000; font-weight:600;">×</button>
-    </div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-weight:700; color:#246422; font-size:1.22em;" id="retailerDashName">Retailer Name</span>
+    <span style="color:#888; font-size:0.97em;" id="retailerDashMobile"></span>
+    <button id="refreshDashBtn" onclick="fetchAndUpdateDashboard()" title="Refresh" 
+      style="background:#eefbe2;border:none;border-radius:5px;padding:4px 10px;font-size:1em;cursor:pointer;margin-left:4px;">
+      🔄
+    </button>
+  </div>
+  <button class="modal-btn" onclick="closeDashboardModal()" 
+      style="background:transparent;color:#c00;font-weight:900;font-size:1.6em;line-height:1;padding:0 7px 2px 7px;border:none;">
+    ×
+  </button>
+</div>
     <div style="display:flex; flex-wrap:wrap; gap:14px 12px; margin-bottom:18px;">
       <div class="dash-metric"><div class="metric-title">Today’s Orders</div><div class="metric-value" id="dashTodayOrders">0</div><div class="metric-sub" id="dashGrowth">+0%</div></div>
       <div class="dash-metric"><div class="metric-title">Month Sales</div><div class="metric-value" id="dashMonthSales">₹0</div></div>
