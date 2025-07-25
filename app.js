@@ -482,10 +482,13 @@ async function fetchAndUpdateDashboard() {
 
 // --- Dashboard Modal logic ---
 function showDashboardModal() {
+  // Set name and mobile in modal
+  document.getElementById('retailerDashName').innerText = localStorage.getItem('retailUserName') || "Retailer";
+  document.getElementById('retailerDashMobile').innerText = localStorage.getItem('retailUser') || "";
   fetchAndUpdateDashboard();
-  
   document.getElementById('dashboardModal').style.display = 'flex';
 }
+
 function closeDashboardModal() {
   document.getElementById('dashboardModal').style.display = 'none';
 }
