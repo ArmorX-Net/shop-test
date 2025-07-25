@@ -387,74 +387,103 @@ function verifyRetailerPIN() {
 }
 }
 
-// --- Payout logic (replace fetch with actual Sheet call in future) ---
-function showPayoutModal() {
-  // Display loader text while fetching
-  document.getElementById('payoutDetails').innerHTML = "Calculating your payout…";
+// --- Payout LIVE (replace fetch with actual Sheet call in future) ---
 
-  // Dummy calculation (replace with real logic: fetch + filter for this retailer)
-  // Example: Suppose 12 orders this month, total sales = ₹20,000, payout = ₹2,000
-  setTimeout(() => {
-    document.getElementById('payoutDetails').innerHTML =
-      `Total Sales: <b>₹20,000</b><br>Payout (10%): <span style='color:#005c28;font-weight:700;'>₹2,000</span>`;
-  }, 800);
+async function fetchAndUpdateDashboard() {
+  const retailerNumber = localStorage.getItem('retailUser') || "";
+  if (!retailerNumber) return;
 
-  document.getElementById('payoutModal').style.display = "flex";
+  // Use your Google Apps Script URL
+  const url = `https://script.google.com/macros/s/AKfycbxIb3-J4n4Kt1sXBxcttdgcyQFSq7EZF_2eZ7H0r3ktRSXKSfkyRtWW7mr_DapkVh3nRA/exec?retailer=${retailerNumber}`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const now = new Date();
+    let todayOrders = 0, monthSales = 0, commission = 0;
+    let recentOrders = [];
+
+    // Find orders from this month and today, calculate commission
+    data.orders.forEach(order => {
+      const orderDate = new Date(order.timestamp);
+      // Today's Orders
+      if (orderDate.toDateString() === now.toDateString()) todayOrders++;
+      // This Month's Sales
+      if (orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear())
+        monthSales += Number(order.total_amount);
+
+      // Commission (only Confirmed or Paid)
+      const status = (order.status || "").toLowerCase();
+      const payStatus = (order.payment_status || "").toLowerCase();
+      if (status.includes("confirm") || status.includes("paid") || payStatus.includes("paid")) {
+        commission += Number(order.total_amount) * 0.10;
+      }
+      // Save for recent
+      recentOrders.push(order);
+    });
+
+    // Sort and take latest 5 orders
+    recentOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    let recentHtml = recentOrders.slice(0, 5).map(order => 
+      `<div>${order.order_id} | <b>₹${order.total_amount}</b> | 
+       <span style="color:${order.status === 'Confirmed' ? '#007b1c' : (order.status === 'Pending' ? '#bfa000' : '#e25c04')}">${order.status}</span></div>`
+    ).join('');
+
+    // Update dashboard metrics
+    document.getElementById('dashTodayOrders').innerText = todayOrders;
+    document.getElementById('dashMonthSales').innerText = "₹" + monthSales.toLocaleString();
+    // If you want to add commission metric:
+    if(document.getElementById('retailerCommission'))
+      document.getElementById('retailerCommission').innerText = "₹" + commission.toLocaleString();
+
+    // For payout, you'll need to implement it later
+    document.getElementById('dashPending').innerText = "₹0";
+    document.getElementById('dashLastPayout').innerText = "₹0";
+    document.getElementById('dashRecentOrders').innerHTML = recentHtml;
+
+    // Update bar chart with last 7 days
+    let days = [];
+    let sales = [];
+    for (let i = 6; i >= 0; i--) {
+      let d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      days.push(d.toLocaleDateString(undefined, {weekday:'short'}));
+      let totalForDay = data.orders.filter(o => {
+        let od = new Date(o.timestamp);
+        return od.toDateString() === d.toDateString() &&
+            ((o.status || "").toLowerCase().includes("confirm") || (o.status || "").toLowerCase().includes("paid"));
+      }).reduce((sum, o) => sum + Number(o.total_amount), 0);
+      sales.push(totalForDay);
+    }
+
+    let ctx = document.getElementById('ordersBarChart').getContext('2d');
+    if (window.dashboardChart) window.dashboardChart.destroy();
+    window.dashboardChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{
+          label: 'Orders',
+          data: sales,
+          backgroundColor: '#a8e063'
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: { legend: { display: false }},
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+
+  } catch (e) {
+    document.getElementById('dashRecentOrders').innerHTML = "<div style='color:#b20000'>Could not fetch dashboard data.</div>";
+  }
 }
+
 
 // --- Dashboard Modal logic ---
 function showDashboardModal() {
-  // Dummy data
-  const retailerName = localStorage.getItem('retailUserName') || "Retailer";
-  const todayOrders = 8, yesterdayOrders = 7;
-  const growth = ((todayOrders - yesterdayOrders)/Math.max(1,yesterdayOrders) * 100).toFixed(1) + "%";
-  const monthSales = 27000, pending = 1800, lastPayout = 2300;
-
-  document.getElementById('retailerDashName').innerText = retailerName;
-  document.getElementById('dashTodayOrders').innerText = todayOrders;
-  document.getElementById('dashGrowth').innerText = (todayOrders - yesterdayOrders >= 0 ? "+" : "") + growth;
-  document.getElementById('dashMonthSales').innerText = "₹" + monthSales.toLocaleString();
-  document.getElementById('dashPending').innerText = "₹" + pending.toLocaleString();
-  document.getElementById('dashLastPayout').innerText = "₹" + lastPayout.toLocaleString();
-
-  // Dummy order trend (7 days)
-  let days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  let sales = [4, 6, 3, 8, 7, 5, todayOrders];
-  let ctx = document.getElementById('ordersBarChart').getContext('2d');
-  if (window.dashboardChart) window.dashboardChart.destroy();
-  window.dashboardChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: days,
-      datasets: [{
-        label: 'Orders',
-        data: sales,
-        backgroundColor: '#a8e063'
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: { legend: { display: false }},
-      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-    }
-  });
-
-  // Dummy recent orders
-  document.getElementById('dashRecentOrders').innerHTML = `
-    <div>ORD20240715-01 | <b>₹1,200</b> | <span style="color:#007b1c">Confirmed</span></div>
-    <div>ORD20240715-02 | <b>₹2,100</b> | <span style="color:#bfa000">Pending</span></div>
-    <div>ORD20240714-05 | <b>₹700</b> | <span style="color:#007b1c">Confirmed</span></div>
-    <div>ORD20240713-03 | <b>₹2,300</b> | <span style="color:#e25c04">Cancelled</span></div>
-    <div>ORD20240713-01 | <b>₹1,850</b> | <span style="color:#007b1c">Confirmed</span></div>
-  `;
-
-  // Dummy payout table
-  document.getElementById('dashPayoutTable').innerHTML = `
-    <tr><td>15 Jul</td><td>₹2,300</td><td><span style="color:#14b01c">Paid</span></td></tr>
-    <tr><td>7 Jul</td><td>₹1,850</td><td><span style="color:#bfa000">Processing</span></td></tr>
-    <tr><td>1 Jul</td><td>₹1,750</td><td><span style="color:#14b01c">Paid</span></td></tr>
-  `;
-
+  fetchAndUpdateDashboard();
+  
   document.getElementById('dashboardModal').style.display = 'flex';
 }
 function closeDashboardModal() {
