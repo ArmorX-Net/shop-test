@@ -236,5 +236,22 @@ button:hover { background: var(--primary-dark); }
     min-width: 65px;
   }
 }
+#dashboardModal .modal-btn {
+  background: transparent;
+  color: #b20000;
+  font-size: 1.6em;
+  font-weight: 900;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.18s;
+  line-height: 1;
+  padding: 0 7px 2px 7px;
+  box-shadow: none;
+}
+
+#dashboardModal .modal-btn:hover {
+  background: #ffeaea;
+}
 
 
