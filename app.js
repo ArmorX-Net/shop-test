@@ -84,7 +84,7 @@ function addWindowEntry() {
     </div>
     <div class="price-link">
   <span class="price-label">Deal Price: ₹<span class="price-value" id="p${idx}">0</span></span>
-  <a id="a${idx}" href="#" target="_blank" style="display:none; font-size:0.98em; color:#2856A5; margin-left:8px;">Amazon Link</a>
+  <a id="a${idx}" href="#" target="_blank" style="display:none; font-size:0.98em; color:#2856A5; margin-left:8px;">Amazon</a>
 </div>
 
   `;
