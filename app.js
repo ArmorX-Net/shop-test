@@ -99,33 +99,79 @@ function calcPrice(idx) {
   let u = document.getElementById('u' + idx).value;
   let c = document.getElementById('c' + idx).value;
   let qty = parseInt(document.getElementById('qty' + idx).value || 1);
+
   if (!h || !w || !qty) {
     document.getElementById('p' + idx).innerText = '0';
+    let a = document.getElementById('a' + idx);
+    if (a) a.style.display = 'none';
     updateTotal(); return;
   }
-  let h_cm = u === "Cm" ? h : (u === "Inch" ? h * 2.54 : h * 30.48);
-  let w_cm = u === "Cm" ? w : (u === "Inch" ? w * 2.54 : w * 30.48);
-  let best = findClosestSize(h_cm, w_cm, c);
+
+  let best = findClosestSize(h, w, c, u);
   if (best) {
     let dealUnit = parseFloat(best['Deal Price']) || 0;
     let dealPrice = dealUnit * qty;
     document.getElementById('p' + idx).innerText = dealPrice;
+    let a = document.getElementById('a' + idx);
+    if (a) {
+      a.href = best['Amazon Link'];
+      a.style.display = best['Amazon Link'] ? '' : 'none';
+    }
   } else {
     document.getElementById('p' + idx).innerText = '0';
+    let a = document.getElementById('a' + idx);
+    if (a) a.style.display = 'none';
   }
   updateTotal();
 }
-function findClosestSize(h_cm, w_cm, c) {
-  let filtered = netSizes.filter(x => x.Color === c && x.Unit === "Cm");
-  if (filtered.length === 0) return null;
-  let best = filtered[0],
-      bestDist = Math.abs(filtered[0]['Height(H)'] - h_cm) + Math.abs(filtered[0]['Width(W)'] - w_cm);
-  for (let item of filtered) {
-    let dist = Math.abs(item['Height(H)'] - h_cm) + Math.abs(item['Width(W)'] - w_cm);
-    if (dist < bestDist) { best = item; bestDist = dist; }
-  }
-  return best;
+
+// Utility: Normalize and cap sizes (returns [heightCm, widthCm])
+function normalizeSizes(h, w, unit) {
+  let hCm = unit === "Cm" ? h : (unit === "Inch" ? h * 2.54 : h * 30.48);
+  let wCm = unit === "Cm" ? w : (unit === "Inch" ? w * 2.54 : w * 30.48);
+  // Cap both sizes at 338 and 183 (either can be height or width)
+  let [bigger, smaller] = [Math.max(hCm, wCm), Math.min(hCm, wCm)];
+  bigger = Math.min(bigger, 338);
+  smaller = Math.min(smaller, 183);
+  return [bigger, smaller];
 }
+
+function findClosestSize(h, w, color, unit = "Cm") {
+  // Normalize and cap entered sizes
+  const [enteredA, enteredB] = normalizeSizes(h, w, unit);
+  let closestMatch = null, smallestDifference = Infinity;
+  const penalty = 500, tolerance = 2.5;
+
+  // Filter by color and 'Cm'
+  const filtered = netSizes.filter(x =>
+    x.Unit === "Cm" && x.Color.toUpperCase() === color.toUpperCase()
+  );
+
+  filtered.forEach(size => {
+    let H = size['Height(H)'], W = size['Width(W)'];
+    // Orientation 1: enteredA~H, enteredB~W
+    let diff1 = 0;
+    if (H >= enteredA || (enteredA - H) <= tolerance) diff1 += Math.max(0, H - enteredA);
+    else diff1 += (enteredA - H) * penalty;
+    if (W >= enteredB || (enteredB - W) <= tolerance) diff1 += Math.max(0, W - enteredB);
+    else diff1 += (enteredB - W) * penalty;
+    // Orientation 2: enteredA~W, enteredB~H
+    let diff2 = 0;
+    if (W >= enteredA || (enteredA - W) <= tolerance) diff2 += Math.max(0, W - enteredA);
+    else diff2 += (enteredA - W) * penalty;
+    if (H >= enteredB || (enteredB - H) <= tolerance) diff2 += Math.max(0, H - enteredB);
+    else diff2 += (enteredB - H) * penalty;
+    const diff = Math.min(diff1, diff2);
+    if (diff < smallestDifference) {
+      smallestDifference = diff;
+      closestMatch = size;
+    }
+  });
+
+  // If nothing, return null
+  return closestMatch;
+}
+
 function updateTotal() {
   let total = 0;
   document.querySelectorAll('[id^=p]').forEach(span => {
