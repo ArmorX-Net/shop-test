@@ -96,36 +96,36 @@ function removeWindowEntry(idx) {
   updateTotal();
 }
 function calcPrice(idx) {
-  let h = parseFloat(document.getElementById('h' + idx).value || 0);
-  let w = parseFloat(document.getElementById('w' + idx).value || 0);
-  let u = document.getElementById('u' + idx).value;
-  let c = document.getElementById('c' + idx).value;
-  let qty = parseInt(document.getElementById('qty' + idx).value || 1);
+    let h = parseFloat(document.getElementById('h' + idx).value || 0);
+    let w = parseFloat(document.getElementById('w' + idx).value || 0);
+    let u = document.getElementById('u' + idx).value;
+    let c = document.getElementById('c' + idx).value;
+    let qty = parseInt(document.getElementById('qty' + idx).value || 1);
 
-  if (!h || !w || !qty) {
-    document.getElementById('p' + idx).innerText = '0';
-    let a = document.getElementById('a' + idx);
-    if (a) a.style.display = 'none';
-    updateTotal(); return;
-  }
-
-  let best = findClosestSize(h, w, c, u);
-  if (best) {
-    let dealUnit = parseFloat(best['Deal Price']) || 0;
-    let dealPrice = dealUnit * qty;
-    document.getElementById('p' + idx).innerText = dealPrice;
-    let a = document.getElementById('a' + idx);
-    if (a) {
-      a.href = best['Amazon Link'];
-      a.style.display = best['Amazon Link'] ? '' : 'none';
+    if (!h || !w || !qty) {
+        document.getElementById('p' + idx).innerText = '0';
+        updateTotal(); return;
     }
-  } else {
-    document.getElementById('p' + idx).innerText = '0';
-    let a = document.getElementById('a' + idx);
-    if (a) a.style.display = 'none';
-  }
-  updateTotal();
+    // Convert to cm
+    let h_cm = u === "Cm" ? h : (u === "Inch" ? h * 2.54 : h * 30.48);
+    let w_cm = u === "Cm" ? w : (u === "Inch" ? w * 2.54 : w * 30.48);
+
+    let best = findClosestSize(h_cm, w_cm, c);
+    if (best === "EXCEEDS_LIMIT") {
+        document.getElementById('p' + idx).innerText = '0';
+        showSizeLimitPopup();
+        return;
+    } else if (best) {
+        let dealUnit = parseFloat(best['Deal Price']) || 0;
+        let dealPrice = dealUnit * qty;
+        document.getElementById('p' + idx).innerText = dealPrice;
+        // Optional: show Amazon link or SKU, etc.
+    } else {
+        document.getElementById('p' + idx).innerText = '0';
+    }
+    updateTotal();
 }
+
 
 // Utility: Normalize and cap sizes (returns [heightCm, widthCm])
 function normalizeSizes(h, w, unit) {
@@ -138,40 +138,35 @@ function normalizeSizes(h, w, unit) {
   return [bigger, smaller];
 }
 
-function findClosestSize(h, w, color, unit = "Cm") {
-  // Normalize and cap entered sizes
-  const [enteredA, enteredB] = normalizeSizes(h, w, unit);
-  let closestMatch = null, smallestDifference = Infinity;
-  const penalty = 500, tolerance = 2.5;
+function findClosestSize(h_cm, w_cm, c) {
+    // Cap both values to max allowed (can swap h/w)
+    let maxH = 338, maxW = 183;
+    let inputH = Math.max(h_cm, w_cm);
+    let inputW = Math.min(h_cm, w_cm);
 
-  // Filter by color and 'Cm'
-  const filtered = netSizes.filter(x =>
-    x.Unit === "Cm" && x.Color.toUpperCase() === color.toUpperCase()
-  );
+    // Check if size exceeds limit in both orientations
+    const exceeds =
+        (inputH > maxH || inputW > maxW) &&
+        (inputH > maxW || inputW > maxH);
 
-  filtered.forEach(size => {
-    let H = size['Height(H)'], W = size['Width(W)'];
-    // Orientation 1: enteredA~H, enteredB~W
-    let diff1 = 0;
-    if (H >= enteredA || (enteredA - H) <= tolerance) diff1 += Math.max(0, H - enteredA);
-    else diff1 += (enteredA - H) * penalty;
-    if (W >= enteredB || (enteredB - W) <= tolerance) diff1 += Math.max(0, W - enteredB);
-    else diff1 += (enteredB - W) * penalty;
-    // Orientation 2: enteredA~W, enteredB~H
-    let diff2 = 0;
-    if (W >= enteredA || (enteredA - W) <= tolerance) diff2 += Math.max(0, W - enteredA);
-    else diff2 += (enteredA - W) * penalty;
-    if (H >= enteredB || (enteredB - H) <= tolerance) diff2 += Math.max(0, H - enteredB);
-    else diff2 += (enteredB - H) * penalty;
-    const diff = Math.min(diff1, diff2);
-    if (diff < smallestDifference) {
-      smallestDifference = diff;
-      closestMatch = size;
-    }
-  });
+    if (exceeds) return "EXCEEDS_LIMIT"; // Trigger the popup in calling code
 
-  // If nothing, return null
-  return closestMatch;
+    // Filter for color and Cm
+    let filtered = netSizes.filter(s =>
+        s.Color === c && s.Unit === "Cm" &&
+        (
+            (s['Height(H)'] <= inputH && s['Width(W)'] <= inputW) ||
+            (s['Height(H)'] <= inputW && s['Width(W)'] <= inputH)
+        )
+    );
+
+    if (filtered.length === 0) return null;
+
+    // Pick SKU with largest area (most coverage)
+    filtered.sort((a, b) => 
+        (b['Height(H)'] * b['Width(W)']) - (a['Height(H)'] * a['Width(W)'])
+    );
+    return filtered[0];
 }
 
 function updateTotal() {
@@ -193,6 +188,30 @@ function handleDeliveryChange() {
     addr.value = "";
     addr.required = false;
   }
+}
+function showSizeLimitPopup() {
+    // WhatsApp message
+    let waMsg = encodeURIComponent("Hi ArmorX, I need a custom mosquito net size larger than the standard limits. Please assist!");
+    let waLink = "https://wa.me/917304692553?text=" + waMsg;
+    let callLink = "tel:7304692553";
+
+    // Simple HTML modal, style as you wish
+    let html = `
+      <div id="sizeLimitModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0006;z-index:9999;display:flex;align-items:center;justify-content:center;">
+        <div style="background:#fff;padding:28px 20px;border-radius:13px;max-width:310px;text-align:center;box-shadow:0 6px 32px #0001;">
+          <div style="font-size:1.35em;color:#d70000;margin-bottom:14px;font-weight:600;">Size Exceeds Limit</div>
+          <div style="margin-bottom:18px;">For sizes above <b>183cm x 338cm</b>, contact Team ArmorX for verification or custom order.</div>
+          <a href="${waLink}" target="_blank" style="background:#25d366;color:#fff;font-weight:700;font-size:1.12em;padding:10px 18px;border-radius:7px;text-decoration:none;display:inline-block;margin-bottom:9px;">
+            <span style="font-size:1.3em;margin-right:7px;">🟢</span> WhatsApp Us
+          </a>
+          <br>
+          <a href="${callLink}" style="color:#1552d1;font-size:1.11em;text-decoration:underline;">📞 Call 7304692553</a>
+          <br><br>
+          <button onclick="document.getElementById('sizeLimitModal').remove()" style="margin-top:12px;background:#eee;color:#d70000;padding:6px 22px;border-radius:7px;border:none;cursor:pointer;">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
 }
 
 // ------- STEPPER LOGIC: BUTTON HANDLERS -------
