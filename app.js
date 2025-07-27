@@ -232,7 +232,7 @@ function showSizeLimitPopup() {
       <div id="sizeLimitModal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0006;z-index:9999;display:flex;align-items:center;justify-content:center;">
         <div style="background:#fff;padding:28px 20px;border-radius:13px;max-width:310px;text-align:center;box-shadow:0 6px 32px #0001;">
           <div style="font-size:1.35em;color:#d70000;margin-bottom:14px;font-weight:600;">Size Exceeds Limit</div>
-          <div style="margin-bottom:18px;">For sizes above <b>183cm x 338cm</b>, contact Team ArmorX for verification or custom order.</div>
+          <div style="margin-bottom:18px;">For sizes above <b>185cm x 340cm</b>, contact Team ArmorX for verification or custom order.</div>
           <a href="${waLink}" target="_blank" style="background:#25d366;color:#fff;font-weight:700;font-size:1.12em;padding:10px 18px;border-radius:7px;text-decoration:none;display:inline-block;margin-bottom:9px;">
             <span style="font-size:1.3em;margin-right:7px;">🟢</span> WhatsApp Us
           </a>
