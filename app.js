@@ -64,50 +64,32 @@ function addWindowEntry() {
   wBox.id = 'window-box-' + idx;
   wBox.innerHTML = `
     <button class="remove-btn" onclick="removeWindowEntry(${idx})" title="Remove">×</button>
-    
     <div class="details-row">
-      <div class="input-group">
-        <label for="h${idx}">Height</label>
-        <input type="number" min="1" id="h${idx}" placeholder="Height" oninput="calcPrice(${idx})"/>
-      </div>
-      <div class="input-group">
-        <label for="w${idx}">Width</label>
-        <input type="number" min="1" id="w${idx}" placeholder="Width" oninput="calcPrice(${idx})"/>
-      </div>
+      <input type="number" min="1" id="h${idx}" placeholder="Height" oninput="calcPrice(${idx})"/>
+      <input type="number" min="1" id="w${idx}" placeholder="Width" oninput="calcPrice(${idx})"/>
     </div>
-    
     <div class="details-row">
-      <div class="input-group">
-        <label for="u${idx}">Unit</label>
-        <select id="u${idx}" onchange="calcPrice(${idx})">
-          <option value="Cm">cm</option>
-          <option value="Inch">in</option>
-          <option value="Feet">ft</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="c${idx}">Color</label>
-        <select id="c${idx}" onchange="calcPrice(${idx})">
-          <option value="BK">Black</option>
-          <option value="CR">Cream</option>
-          <option value="GR">Grey</option>
-          <option value="WH">White</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="qty${idx}">Qty</label>
-        <input type="number" min="1" value="1" id="qty${idx}" placeholder="Qty" oninput="calcPrice(${idx})"/>
-      </div>
+      <select id="u${idx}" onchange="calcPrice(${idx})">
+        <option value="Cm">cm</option>
+        <option value="Inch">in</option>
+        <option value="Feet">ft</option>
+      </select>
+      <select id="c${idx}" onchange="calcPrice(${idx})">
+        <option value="BK">Black</option>
+        <option value="CR">Cream</option>
+        <option value="GR">Grey</option>
+        <option value="WH">White</option>
+      </select>
+      <input type="number" min="1" value="1" id="qty${idx}" placeholder="Qty" oninput="calcPrice(${idx})"/>
     </div>
-
     <div class="price-link">
-      <span class="price-label">Deal Price: ₹<span class="price-value" id="p${idx}">0</span></span>
-      <a id="a${idx}" href="#" target="_blank" style="display:none; font-size:0.98em; color:#2856A5; margin-left:8px;">Amazon</a>
-    </div>
+  <span class="price-label">Deal Price: ₹<span class="price-value" id="p${idx}">0</span></span>
+  <a id="a${idx}" href="#" target="_blank" style="display:none; font-size:0.98em; color:#2856A5; margin-left:8px;">Amazon</a>
+</div>
+
   `;
   document.getElementById('windows-list').appendChild(wBox);
 }
-
 function removeWindowEntry(idx) {
   const box = document.getElementById('window-box-' + idx);
   if (box) box.remove();
@@ -441,7 +423,7 @@ function handleSubmitOrder() {
   // 1. Show spinner
   document.getElementById('savingSpinner').style.display = "block";
   // 2. Save order
-  fetch('https://shop-test-eosin-one.vercel.app/api/proxy', {
+  fetch('https://shop-tan-nine.vercel.app/api/proxy', {
     method: 'POST',
     body: JSON.stringify(orderObj),
     headers: {'Content-Type': 'application/json'}
