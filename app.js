@@ -96,35 +96,37 @@ function removeWindowEntry(idx) {
   updateTotal();
 }
 function calcPrice(idx) {
-    let h = parseFloat(document.getElementById('h' + idx).value || 0);
-    let w = parseFloat(document.getElementById('w' + idx).value || 0);
-    let u = document.getElementById('u' + idx).value;
-    let c = document.getElementById('c' + idx).value;
-    let qty = parseInt(document.getElementById('qty' + idx).value || 1);
+  let h = parseFloat(document.getElementById('h' + idx).value || 0);
+  let w = parseFloat(document.getElementById('w' + idx).value || 0);
+  let u = document.getElementById('u' + idx).value;
+  let c = document.getElementById('c' + idx).value;
+  let qty = parseInt(document.getElementById('qty' + idx).value || 1);
 
-    if (!h || !w || !qty) {
-        document.getElementById('p' + idx).innerText = '0';
-        updateTotal(); return;
-    }
-    // Convert to cm
-    let h_cm = u === "Cm" ? h : (u === "Inch" ? h * 2.54 : h * 30.48);
-    let w_cm = u === "Cm" ? w : (u === "Inch" ? w * 2.54 : w * 30.48);
+  if (!h || !w || !qty) {
+    document.getElementById('p' + idx).innerText = '0';
+    let a = document.getElementById('a' + idx);
+    if (a) a.style.display = 'none';
+    updateTotal(); return;
+  }
 
-    let best = findClosestSize(h_cm, w_cm, c);
-    if (best === "EXCEEDS_LIMIT") {
-        document.getElementById('p' + idx).innerText = '0';
-        showSizeLimitPopup();
-        return;
-    } else if (best) {
-        let dealUnit = parseFloat(best['Deal Price']) || 0;
-        let dealPrice = dealUnit * qty;
-        document.getElementById('p' + idx).innerText = dealPrice;
-        // Optional: show Amazon link or SKU, etc.
-    } else {
-        document.getElementById('p' + idx).innerText = '0';
+  let best = findClosestSize(h, w, c, u);
+  if (best) {
+    let dealUnit = parseFloat(best['Deal Price']) || 0;
+    let dealPrice = dealUnit * qty;
+    document.getElementById('p' + idx).innerText = dealPrice;
+    let a = document.getElementById('a' + idx);
+    if (a) {
+      a.href = best['Amazon Link'];
+      a.style.display = best['Amazon Link'] ? '' : 'none';
     }
-    updateTotal();
+  } else {
+    document.getElementById('p' + idx).innerText = '0';
+    let a = document.getElementById('a' + idx);
+    if (a) a.style.display = 'none';
+  }
+  updateTotal();
 }
+
 
 
 // Utility: Normalize and cap sizes (returns [heightCm, widthCm])
@@ -138,35 +140,51 @@ function normalizeSizes(h, w, unit) {
   return [bigger, smaller];
 }
 
-function findClosestSize(h_cm, w_cm, c) {
-    // Cap both values to max allowed (can swap h/w)
-    let maxH = 338, maxW = 183;
-    let inputH = Math.max(h_cm, w_cm);
-    let inputW = Math.min(h_cm, w_cm);
+// Utility: Normalize and cap sizes (returns [heightCm, widthCm])
+function normalizeSizes(h, w, unit) {
+  let hCm = unit === "Cm" ? h : (unit === "Inch" ? h * 2.54 : h * 30.48);
+  let wCm = unit === "Cm" ? w : (unit === "Inch" ? w * 2.54 : w * 30.48);
+  // Cap both sizes at 338 and 183 (either can be height or width)
+  let [bigger, smaller] = [Math.max(hCm, wCm), Math.min(hCm, wCm)];
+  bigger = Math.min(bigger, 338);
+  smaller = Math.min(smaller, 183);
+  return [bigger, smaller];
+}
 
-    // Check if size exceeds limit in both orientations
-    const exceeds =
-        (inputH > maxH || inputW > maxW) &&
-        (inputH > maxW || inputW > maxH);
+function findClosestSize(h, w, color, unit = "Cm") {
+  // Normalize and cap entered sizes
+  const [enteredA, enteredB] = normalizeSizes(h, w, unit);
+  let closestMatch = null, smallestDifference = Infinity;
+  const penalty = 500, tolerance = 2.5;
 
-    if (exceeds) return "EXCEEDS_LIMIT"; // Trigger the popup in calling code
+  // Filter by color and 'Cm'
+  const filtered = netSizes.filter(x =>
+    x.Unit === "Cm" && x.Color.toUpperCase() === color.toUpperCase()
+  );
 
-    // Filter for color and Cm
-    let filtered = netSizes.filter(s =>
-        s.Color === c && s.Unit === "Cm" &&
-        (
-            (s['Height(H)'] <= inputH && s['Width(W)'] <= inputW) ||
-            (s['Height(H)'] <= inputW && s['Width(W)'] <= inputH)
-        )
-    );
+  filtered.forEach(size => {
+    let H = size['Height(H)'], W = size['Width(W)'];
+    // Orientation 1: enteredA~H, enteredB~W
+    let diff1 = 0;
+    if (H >= enteredA || (enteredA - H) <= tolerance) diff1 += Math.max(0, H - enteredA);
+    else diff1 += (enteredA - H) * penalty;
+    if (W >= enteredB || (enteredB - W) <= tolerance) diff1 += Math.max(0, W - enteredB);
+    else diff1 += (enteredB - W) * penalty;
+    // Orientation 2: enteredA~W, enteredB~H
+    let diff2 = 0;
+    if (W >= enteredA || (enteredA - W) <= tolerance) diff2 += Math.max(0, W - enteredA);
+    else diff2 += (enteredA - W) * penalty;
+    if (H >= enteredB || (enteredB - H) <= tolerance) diff2 += Math.max(0, H - enteredB);
+    else diff2 += (enteredB - H) * penalty;
+    const diff = Math.min(diff1, diff2);
+    if (diff < smallestDifference) {
+      smallestDifference = diff;
+      closestMatch = size;
+    }
+  });
 
-    if (filtered.length === 0) return null;
-
-    // Pick SKU with largest area (most coverage)
-    filtered.sort((a, b) => 
-        (b['Height(H)'] * b['Width(W)']) - (a['Height(H)'] * a['Width(W)'])
-    );
-    return filtered[0];
+  // If nothing, return null
+  return closestMatch;
 }
 
 function updateTotal() {
