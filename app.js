@@ -109,12 +109,15 @@ function calcPrice(idx) {
    // Check BOTH orientations for exceeding limits
   if ((hCm > 185 && wCm > 340) || (hCm > 340 && wCm > 185)) {
     showSizeLimitPopup();
+    // Clear input fields for this entry
+    document.getElementById('h' + idx).value = '';
+    document.getElementById('w' + idx).value = '';
     document.getElementById('p' + idx).innerText = '0';
     let a = document.getElementById('a' + idx);
     if (a) a.style.display = 'none';
     updateTotal();
     return;
-  }
+}
 
   if (!h || !w || !qty) {
     document.getElementById('p' + idx).innerText = '0';
@@ -249,22 +252,39 @@ function showSizeLimitPopup() {
 // ------- STEPPER LOGIC: BUTTON HANDLERS -------
 // Step 1 → Step 2: Validate & create Order ID
 function handleOrderDetailsNext() {
-  let name = document.getElementById('cust-name').value.trim();
-  let phone = document.getElementById('cust-phone').value.trim();
-  let delivery = document.getElementById('delivery-mode').value;
-  let address = (delivery === "Home Delivery") ? document.getElementById('cust-address').value.trim() : '';
+  const name = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
+  const delivery = document.getElementById('delivery-mode').value;
+  const address = (delivery === "Home Delivery") ? document.getElementById('cust-address').value.trim() : '';
   let hasAny = false;
+
   document.querySelectorAll('.window-box').forEach((box) => {
-    let idx = box.id.split('-')[2];
-    let h = document.getElementById('h'+idx).value;
-    let w = document.getElementById('w'+idx).value;
-    let qty = document.getElementById('qty'+idx).value;
-    let price = document.getElementById('p'+idx).innerText;
-    if (h && w && price && qty > 0) hasAny = true;
+    const idx = box.id.split('-')[2];
+    const h = document.getElementById('h'+idx).value;
+    const w = document.getElementById('w'+idx).value;
+    const qty = Number(document.getElementById('qty'+idx).value || 0);
+    const price = parseFloat(document.getElementById('p'+idx).innerText || 0);
+    if (h && w && price > 0 && qty > 0) hasAny = true;
   });
-  if (!name || !/^\d{10}$/.test(phone)) { alert('Enter customer details correctly!'); return; }
-  if (delivery === "Home Delivery" && !address) { alert('Please enter customer address for Home Delivery.'); return; }
-  if (!hasAny) { alert('Please enter at least one window net details.'); return; }
+
+  if (!name || !/^\d{10}$/.test(phone)) {
+    alert('Enter customer details correctly!');
+    return;
+  }
+  if (delivery === "Home Delivery" && !address) {
+    alert('Please enter customer address for Home Delivery.');
+    return;
+  }
+  if (!hasAny) {
+    alert('Please enter at least one window net details.');
+    return;
+  }
+  // Check if total price is zero
+  const total = parseFloat(document.getElementById('total-price').innerText || '0');
+  if (total === 0) {
+    alert('Order total cannot be zero. Please enter valid window sizes.');
+    return;
+  }
 
   // --- Generate new Order ID here ---
   const retailerNumber = localStorage.getItem('retailUser') || "";
@@ -274,31 +294,32 @@ function handleOrderDetailsNext() {
   currentOrderId = `AXW-${last4}-${now.getFullYear().toString().slice(-2)}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
   document.getElementById('order-id-display').innerText = currentOrderId;
 
-// ---- Build summary like in handlePaymentNext() ----
-let summary = "";
-summary += `<b>Customer:</b> ${document.getElementById('cust-name').value} (${document.getElementById('cust-phone').value})<br>`;
-summary += `<b>Delivery:</b> ${document.getElementById('delivery-mode').value}`;
-if (document.getElementById('cust-address').style.display !== 'none')
-  summary += `<br><b>Address:</b> ${document.getElementById('cust-address').value}`;
-summary += "<hr><b>Windows:</b><br>";
-document.querySelectorAll('.window-box').forEach((box, i) => {
-  let idx = box.id.split('-')[2];
-  let h = document.getElementById('h'+idx).value;
-  let w = document.getElementById('w'+idx).value;
-  let u = document.getElementById('u'+idx).value;
-  let c = document.getElementById('c'+idx).value;
-  let qty = document.getElementById('qty'+idx).value;
-  let price = document.getElementById('p'+idx).innerText;
-  let colorName = { BK: 'Black', CR: 'Cream', GR: 'Grey', WH: 'White' }[c] || c;
-  if (h && w && price && qty > 0) {
-    summary += `#${i+1}: ${h}x${w} ${u} | ${colorName} | Qty: ${qty} | ₹${price}<br>`;
-  }
-});
-summary += `<hr><b>Total: ₹${document.getElementById('total-price').innerText}</b>`;
-document.getElementById('payment-order-summary').innerHTML = summary;
+  // ---- Build summary like in handlePaymentNext() ----
+  let summary = "";
+  summary += `<b>Customer:</b> ${name} (${phone})<br>`;
+  summary += `<b>Delivery:</b> ${delivery}`;
+  if (document.getElementById('cust-address').style.display !== 'none')
+    summary += `<br><b>Address:</b> ${address}`;
+  summary += "<hr><b>Windows:</b><br>";
+  document.querySelectorAll('.window-box').forEach((box, i) => {
+    const idx = box.id.split('-')[2];
+    const h = document.getElementById('h'+idx).value;
+    const w = document.getElementById('w'+idx).value;
+    const u = document.getElementById('u'+idx).value;
+    const c = document.getElementById('c'+idx).value;
+    const qty = document.getElementById('qty'+idx).value;
+    const price = document.getElementById('p'+idx).innerText;
+    const colorName = { BK: 'Black', CR: 'Cream', GR: 'Grey', WH: 'White' }[c] || c;
+    if (h && w && price && qty > 0) {
+      summary += `#${i+1}: ${h}x${w} ${u} | ${colorName} | Qty: ${qty} | ₹${price}<br>`;
+    }
+  });
+  summary += `<hr><b>Total: ₹${document.getElementById('total-price').innerText}</b>`;
+  document.getElementById('payment-order-summary').innerHTML = summary;
 
-showStep(2);
+  showStep(2);
 }
+
 // Payment checkbox
 function togglePaymentNextBtn() {
   document.getElementById('step2-next-btn').disabled = !document.getElementById('payment-collected-checkbox').checked;
