@@ -102,6 +102,20 @@ function calcPrice(idx) {
   let c = document.getElementById('c' + idx).value;
   let qty = parseInt(document.getElementById('qty' + idx).value || 1);
 
+  // Convert to cm for checking limits
+  let hCm = u === "Cm" ? h : (u === "Inch" ? h * 2.54 : h * 30.48);
+  let wCm = u === "Cm" ? w : (u === "Inch" ? w * 2.54 : w * 30.48);
+
+   // Check BOTH orientations for exceeding limits
+  if ((hCm > 185 && wCm > 340) || (hCm > 340 && wCm > 185)) {
+    showSizeLimitPopup();
+    document.getElementById('p' + idx).innerText = '0';
+    let a = document.getElementById('a' + idx);
+    if (a) a.style.display = 'none';
+    updateTotal();
+    return;
+  }
+
   if (!h || !w || !qty) {
     document.getElementById('p' + idx).innerText = '0';
     let a = document.getElementById('a' + idx);
