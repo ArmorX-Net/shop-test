@@ -423,7 +423,7 @@ function handleSubmitOrder() {
   // 1. Show spinner
   document.getElementById('savingSpinner').style.display = "block";
   // 2. Save order
-  fetch('https://shop-tan-nine.vercel.app/api/proxy', {
+  fetch('https://shop-test-eosin-one.vercel.app/api/proxy', {
     method: 'POST',
     body: JSON.stringify(orderObj),
     headers: {'Content-Type': 'application/json'}
