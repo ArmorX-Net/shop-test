@@ -5,9 +5,19 @@ let authorizedDistributors = [];
 let currentOrderId = ""; // OrderID assigned per new order
 
 // ------- AUTH/LOGIN -------
-fetch('RDDRetailDistData.json')
+// Fetch retailer list from Google Sheet API
+fetch('https://script.google.com/macros/s/AKfycbxIb3-J4n4Kt1sXBxcttdgcyQFSq7EZF_2eZ7H0r3ktRSXKSfkyRtWW7mr_DapkVh3nRA/exec?type=retailers
+')
   .then(r => r.json())
-  .then(data => { authorizedDistributors = data; });
+  .then(data => {
+    authorizedDistributors = data;
+    console.log("Retailers loaded:", authorizedDistributors);
+  })
+  .catch(err => {
+    console.error("Failed to fetch retailer data:", err);
+    alert("Could not load retailer list. Please try again.");
+  });
+
 
 document.addEventListener("DOMContentLoaded", () => {
   fetch('MQ_Sizes_Unit_Color_and_Links.json')
@@ -612,3 +622,4 @@ function showDashboardModal() {
 function closeDashboardModal() {
   document.getElementById('dashboardModal').style.display = 'none';
 }
+
