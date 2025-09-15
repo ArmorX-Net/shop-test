@@ -1,8 +1,9 @@
 https://vercel.com/
 
 HAVE USED BELOW:
-https://shop-tan-nine.vercel.app/api/proxy 
-https://shop-test-eosin-one.vercel.app/api/proxy
+https://shop-tan-nine.vercel.app/api/proxy (THIS IN MAIN ACTUAL APP)
+
+https://shop-test-eosin-one.vercel.app/api/proxy (THIS IN TESTING APP)
 
 ABOVE TWO LINKS NEEDS TO BE REPLACED IN BELOW CODE
  // 1. Show spinner
